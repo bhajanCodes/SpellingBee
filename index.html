@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spelling Bee Practice</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .container {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      padding: 40px;
+      max-width: 600px;
+      width: 100%;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 10px;
+      font-size: 2.5em;
+    }
+
+    .bee-icon {
+      text-align: center;
+      font-size: 3em;
+      margin-bottom: 20px;
+    }
+
+    /* Start Screen */
+    #start-screen {
+      text-align: center;
+    }
+
+    #start-screen p {
+      color: #666;
+      margin-bottom: 20px;
+      font-size: 1.1em;
+    }
+
+    .difficulty-selector {
+      margin-bottom: 30px;
+    }
+
+    .difficulty-selector label {
+      display: block;
+      color: #333;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+
+    .difficulty-selector select {
+      padding: 12px 20px;
+      font-size: 1.1em;
+      border: 2px solid #667eea;
+      border-radius: 10px;
+      background: white;
+      color: #333;
+      cursor: pointer;
+      width: 100%;
+      max-width: 300px;
+    }
+
+    .difficulty-selector select:focus {
+      outline: none;
+      border-color: #764ba2;
+    }
+
+    .btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 15px 40px;
+      font-size: 1.2em;
+      border-radius: 30px;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    /* Game Screen */
+    #game-screen {
+      display: none;
+    }
+
+    .progress-bar {
+      background: #e0e0e0;
+      border-radius: 10px;
+      height: 20px;
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      height: 100%;
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    .stats {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 30px;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 10px;
+    }
+
+    .stat {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 1.5em;
+      font-weight: bold;
+      color: #667eea;
+    }
+
+    .stat-label {
+      font-size: 0.85em;
+      color: #666;
+    }
+
+    .word-display {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .difficulty-badge {
+      display: inline-block;
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-size: 0.85em;
+      margin-bottom: 15px;
+    }
+
+    .difficulty-1 { background: #d4edda; color: #155724; }
+    .difficulty-2 { background: #cce5ff; color: #004085; }
+    .difficulty-3 { background: #fff3cd; color: #856404; }
+    .difficulty-4 { background: #f8d7da; color: #721c24; }
+    .difficulty-5 { background: #343a40; color: #fff; }
+
+    .speak-btn {
+      background: #667eea;
+      color: white;
+      border: none;
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      font-size: 2em;
+      cursor: pointer;
+      transition: transform 0.2s, background 0.2s;
+      margin: 20px 0;
+    }
+
+    .speak-btn:hover {
+      background: #764ba2;
+      transform: scale(1.1);
+    }
+
+    .speak-hint {
+      color: #666;
+      font-size: 0.9em;
+    }
+
+    /* Spelling Bee Helper Buttons */
+    .helper-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 20px 0;
+      flex-wrap: wrap;
+    }
+
+    .helper-btn {
+      background: #f8f9fa;
+      border: 2px solid #667eea;
+      color: #667eea;
+      padding: 10px 16px;
+      font-size: 0.9em;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .helper-btn:hover {
+      background: #667eea;
+      color: white;
+    }
+
+    .helper-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .helper-btn .icon {
+      font-size: 1.1em;
+    }
+
+    /* Hint Display Area */
+    .hint-display {
+      background: #f0f4ff;
+      border: 1px solid #667eea;
+      border-radius: 10px;
+      padding: 15px;
+      margin: 15px 0;
+      display: none;
+      animation: slideIn 0.3s ease;
+    }
+
+    .hint-display.visible {
+      display: block;
+    }
+
+    .hint-label {
+      font-weight: bold;
+      color: #667eea;
+      font-size: 0.85em;
+      text-transform: uppercase;
+      margin-bottom: 5px;
+    }
+
+    .hint-content {
+      color: #333;
+      line-height: 1.5;
+    }
+
+    .hint-speaking {
+      display: inline-block;
+      margin-left: 8px;
+      color: #667eea;
+      animation: pulse 0.5s ease infinite;
+    }
+
+    .input-area {
+      margin-bottom: 20px;
+    }
+
+    #spelling-input {
+      width: 100%;
+      padding: 15px 20px;
+      font-size: 1.3em;
+      border: 3px solid #e0e0e0;
+      border-radius: 10px;
+      text-align: center;
+      transition: border-color 0.3s;
+    }
+
+    #spelling-input:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    #spelling-input.correct {
+      border-color: #28a745;
+      background: #d4edda;
+    }
+
+    #spelling-input.incorrect {
+      border-color: #dc3545;
+      background: #f8d7da;
+    }
+
+    .btn-submit {
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    /* Feedback Area */
+    #feedback-area {
+      display: none;
+      margin-top: 20px;
+      padding: 20px;
+      border-radius: 10px;
+      animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    #feedback-area.correct {
+      background: #d4edda;
+      border: 1px solid #c3e6cb;
+    }
+
+    #feedback-area.incorrect {
+      background: #f8d7da;
+      border: 1px solid #f5c6cb;
+    }
+
+    .feedback-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .feedback-icon {
+      font-size: 1.5em;
+    }
+
+    .feedback-title {
+      font-size: 1.2em;
+      font-weight: bold;
+    }
+
+    .correct-spelling {
+      font-size: 1.1em;
+      margin-bottom: 15px;
+      padding: 10px;
+      background: rgba(255,255,255,0.5);
+      border-radius: 5px;
+    }
+
+    .word-info h3 {
+      color: #333;
+      margin: 15px 0 10px;
+      font-size: 1em;
+    }
+
+    .word-info p {
+      color: #555;
+      line-height: 1.6;
+    }
+
+    .word-info .origin {
+      font-style: italic;
+      color: #666;
+    }
+
+    .btn-next {
+      margin-top: 15px;
+    }
+
+    /* Results Screen */
+    #results-screen {
+      display: none;
+      text-align: center;
+    }
+
+    .final-score {
+      font-size: 4em;
+      font-weight: bold;
+      color: #667eea;
+      margin: 20px 0;
+    }
+
+    .score-message {
+      font-size: 1.3em;
+      color: #333;
+      margin-bottom: 10px;
+    }
+
+    .score-details {
+      color: #666;
+      margin-bottom: 30px;
+    }
+
+    .words-review {
+      text-align: left;
+      margin: 20px 0;
+      max-height: 300px;
+      overflow-y: auto;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 10px;
+    }
+
+    .review-word {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .review-word:last-child {
+      border-bottom: none;
+    }
+
+    .review-word.correct-word {
+      color: #155724;
+    }
+
+    .review-word.incorrect-word {
+      color: #721c24;
+    }
+
+    /* Loading spinner */
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #667eea;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-left: 10px;
+      vertical-align: middle;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Streak indicator */
+    .streak {
+      text-align: center;
+      margin-bottom: 15px;
+    }
+
+    .streak-fire {
+      font-size: 1.5em;
+      animation: pulse 0.5s ease infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+    }
+
+    .streak-text {
+      color: #ff6b6b;
+      font-weight: bold;
+    }
+
+    /* Responsive */
+    @media (max-width: 480px) {
+      .container {
+        padding: 20px;
+      }
+
+      h1 {
+        font-size: 1.8em;
+      }
+
+      .stats {
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .stat {
+        flex: 1 1 45%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Start Screen -->
+    <div id="start-screen">
+      <div class="bee-icon">&#x1f41d;</div>
+      <h1>Spelling Bee</h1>
+      <p>Practice your spelling with 20 words!</p>
+
+      <div class="difficulty-selector">
+        <label for="min-difficulty">Minimum Difficulty:</label>
+        <select id="min-difficulty">
+          <option value="1">1 - Easy (all words)</option>
+          <option value="2">2 - Medium</option>
+          <option value="3">3 - Challenging</option>
+          <option value="4">4 - Hard</option>
+          <option value="5">5 - Expert</option>
+        </select>
+      </div>
+
+      <button class="btn" onclick="startGame()">Start Practice</button>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="game-screen">
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-value" id="word-num">1/20</div>
+          <div class="stat-label">Word</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value" id="score">0</div>
+          <div class="stat-label">Score</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value" id="correct-count">0</div>
+          <div class="stat-label">Correct</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value" id="difficulty-level">1</div>
+          <div class="stat-label">Level</div>
+        </div>
+      </div>
+
+      <div class="streak" id="streak-display" style="display: none;">
+        <span class="streak-fire">&#x1f525;</span>
+        <span class="streak-text" id="streak-text">2 in a row!</span>
+      </div>
+
+      <div class="word-display">
+        <div class="difficulty-badge" id="difficulty-badge">Easy</div>
+        <div>
+          <button class="speak-btn" onclick="speakWord()" title="Hear the word">
+            &#x1f50a;
+          </button>
+        </div>
+        <p class="speak-hint">Click to hear the word</p>
+
+        <div class="helper-buttons">
+          <button class="helper-btn" onclick="requestDefinition()" id="btn-definition">
+            <span class="icon">&#x1f4d6;</span> Definition
+          </button>
+          <button class="helper-btn" onclick="requestOrigin()" id="btn-origin">
+            <span class="icon">&#x1f30d;</span> Origin
+          </button>
+          <button class="helper-btn" onclick="requestUsage()" id="btn-usage">
+            <span class="icon">&#x1f4ac;</span> Use in Sentence
+          </button>
+        </div>
+      </div>
+
+      <div class="input-area">
+        <input
+          type="text"
+          id="spelling-input"
+          placeholder="Type the word here..."
+          autocomplete="off"
+          autocapitalize="off"
+          spellcheck="false"
+        >
+        <button class="btn btn-submit" id="btn-submit" onclick="checkSpelling()">Submit</button>
+        <button class="btn btn-submit" id="btn-next-top" onclick="nextWord()" style="display: none;">Next Word</button>
+      </div>
+
+      <div id="feedback-area">
+        <div class="feedback-header">
+          <span class="feedback-icon" id="feedback-icon"></span>
+          <span class="feedback-title" id="feedback-title"></span>
+        </div>
+        <div class="correct-spelling" id="correct-spelling"></div>
+        <div class="word-info" id="word-info">
+          <div id="word-definition"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Results Screen -->
+    <div id="results-screen">
+      <div class="bee-icon">&#x1f3c6;</div>
+      <h1>Great Job!</h1>
+      <div class="final-score" id="final-score">0</div>
+      <div class="score-message" id="score-message">Points</div>
+      <div class="score-details" id="score-details"></div>
+
+      <div class="words-review" id="words-review"></div>
+
+      <button class="btn" onclick="startGame()">Play Again</button>
+    </div>
+  </div>
+
+  <script src="words.js"></script>
+  <script>
+    // Game State
+    let currentWordIndex = 0;
+    let currentWord = '';
+    let score = 0;
+    let correctCount = 0;
+    let streak = 0;
+    let maxStreak = 0;
+    let gameWords = [];
+    let wordResults = [];
+    let currentWordInfo = null;
+    let minDifficulty = 1;
+
+    const TOTAL_WORDS = 20;
+
+    // Initialize game
+    function startGame() {
+      // Reset state
+      currentWordIndex = 0;
+      score = 0;
+      correctCount = 0;
+      streak = 0;
+      maxStreak = 0;
+      wordResults = [];
+      currentWordInfo = null;
+
+      // Get selected minimum difficulty
+      minDifficulty = parseInt(document.getElementById('min-difficulty').value);
+
+      // Select words with increasing difficulty
+      gameWords = selectGameWords();
+
+      // Show game screen
+      document.getElementById('start-screen').style.display = 'none';
+      document.getElementById('results-screen').style.display = 'none';
+      document.getElementById('game-screen').style.display = 'block';
+
+      // Load first word
+      loadWord();
+    }
+
+    // Select 20 words with increasing difficulty from minDifficulty up
+    function selectGameWords() {
+      const selected = [];
+      const availableLevels = [];
+
+      // Get available difficulty levels based on minimum selection
+      for (let diff = minDifficulty; diff <= 5; diff++) {
+        availableLevels.push(diff);
+      }
+
+      // Calculate words per level to reach 20 total
+      const wordsPerLevel = Math.ceil(TOTAL_WORDS / availableLevels.length);
+
+      for (const diff of availableLevels) {
+        const wordsAtDifficulty = getAllWords().filter(w => WORD_DIFFICULTY[w] === diff);
+        const shuffled = shuffleArray([...wordsAtDifficulty]);
+        selected.push(...shuffled.slice(0, wordsPerLevel));
+      }
+
+      // Shuffle and trim to exactly 20 words
+      return shuffleArray(selected).slice(0, TOTAL_WORDS);
+    }
+
+    // Shuffle array
+    function shuffleArray(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    // Load current word
+    function loadWord() {
+      currentWord = gameWords[currentWordIndex];
+      currentWordInfo = null;
+
+      // Update UI
+      updateStats();
+      updateDifficultyBadge();
+
+      // Reset input
+      const input = document.getElementById('spelling-input');
+      input.value = '';
+      input.className = '';
+      input.disabled = false;
+      input.focus();
+
+      // Hide feedback
+      document.getElementById('feedback-area').style.display = 'none';
+
+      // Reset buttons - show Submit, hide Next
+      document.getElementById('btn-submit').style.display = 'block';
+      document.getElementById('btn-next-top').style.display = 'none';
+      document.getElementById('btn-definition').disabled = false;
+      document.getElementById('btn-origin').disabled = false;
+      document.getElementById('btn-usage').disabled = false;
+
+      // Fetch word info in background with timeout fallback
+      fetchWordInfo(currentWord);
+      setTimeout(() => {
+        if (!currentWordInfo) {
+          currentWordInfo = getDefaultWordInfo(currentWord);
+        }
+      }, 3000);
+
+      // Auto-speak the word once voices are ready
+      speakWordWhenReady();
+    }
+
+    // Speak word when voices are loaded (with max retries)
+    let voiceRetries = 0;
+    function speakWordWhenReady() {
+      const voices = window.speechSynthesis.getVoices();
+      if (voices.length > 0 || voiceRetries > 20) {
+        voiceRetries = 0;
+        speakWord();
+      } else {
+        voiceRetries++;
+        setTimeout(speakWordWhenReady, 100);
+      }
+    }
+
+    // Update statistics display
+    function updateStats() {
+      document.getElementById('word-num').textContent = `${currentWordIndex + 1}/${gameWords.length}`;
+      document.getElementById('score').textContent = score;
+      document.getElementById('correct-count').textContent = correctCount;
+      document.getElementById('difficulty-level').textContent = WORD_DIFFICULTY[currentWord] || minDifficulty;
+      document.getElementById('progress-fill').style.width = `${((currentWordIndex) / gameWords.length) * 100}%`;
+
+      // Update streak display
+      if (streak >= 2) {
+        document.getElementById('streak-display').style.display = 'block';
+        document.getElementById('streak-text').textContent = `${streak} in a row!`;
+      } else {
+        document.getElementById('streak-display').style.display = 'none';
+      }
+    }
+
+    // Update difficulty badge
+    function updateDifficultyBadge() {
+      const diff = WORD_DIFFICULTY[currentWord];
+      const badge = document.getElementById('difficulty-badge');
+      badge.className = `difficulty-badge difficulty-${diff}`;
+
+      const labels = ['', 'Easy', 'Medium', 'Challenging', 'Hard', 'Expert'];
+      badge.textContent = labels[diff];
+    }
+
+    // Text-to-speech
+    function speakWord() {
+      if ('speechSynthesis' in window) {
+        // Cancel any ongoing speech
+        window.speechSynthesis.cancel();
+
+        const utterance = new SpeechSynthesisUtterance(currentWord);
+        utterance.rate = 0.8;
+        utterance.pitch = 1;
+
+        // Prefer American English voice
+        const voices = window.speechSynthesis.getVoices();
+        const americanVoice = voices.find(v => v.lang === 'en-US')
+                           || voices.find(v => v.lang.startsWith('en'));
+        if (americanVoice) {
+          utterance.voice = americanVoice;
+        }
+
+        window.speechSynthesis.speak(utterance);
+      } else {
+        alert('Sorry, your browser does not support text-to-speech.');
+      }
+    }
+
+    // Request definition before answering (audio only)
+    function requestDefinition() {
+      // Force default info if still loading
+      if (!currentWordInfo) {
+        currentWordInfo = getDefaultWordInfo(currentWord);
+      }
+
+      let text = '';
+      if (currentWordInfo.meanings && currentWordInfo.meanings.length > 0) {
+        const meaning = currentWordInfo.meanings[0];
+        text = meaning.partOfSpeech + ': ' + (meaning.definitions?.[0]?.definition || 'No definition available');
+      } else {
+        text = 'Definition not available.';
+      }
+
+      speakText(text);
+    }
+
+    // Request origin before answering (audio only)
+    function requestOrigin() {
+      // Force default info if still loading
+      if (!currentWordInfo) {
+        currentWordInfo = getDefaultWordInfo(currentWord);
+      }
+
+      const origin = currentWordInfo.origin || 'Origin information not available for this word.';
+      speakText(origin);
+    }
+
+    // Request usage in a sentence before answering (audio only)
+    function requestUsage() {
+      // Force default info if still loading
+      if (!currentWordInfo) {
+        currentWordInfo = getDefaultWordInfo(currentWord);
+      }
+
+      let example = '';
+      if (currentWordInfo.meanings) {
+        for (const meaning of currentWordInfo.meanings) {
+          for (const def of meaning.definitions || []) {
+            if (def.example) {
+              example = def.example;
+              break;
+            }
+          }
+          if (example) break;
+        }
+      }
+
+      speakText(example || 'No example sentence available for this word.');
+    }
+
+    // Speak arbitrary text
+    function speakText(text) {
+      if (!('speechSynthesis' in window) || !text) return;
+
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 0.9;
+      utterance.pitch = 1;
+
+      const voices = window.speechSynthesis.getVoices();
+      const americanVoice = voices.find(v => v.lang === 'en-US')
+                         || voices.find(v => v.lang.startsWith('en'));
+      if (americanVoice) utterance.voice = americanVoice;
+
+      window.speechSynthesis.speak(utterance);
+    }
+
+    // Fetch word information from dictionary API
+    async function fetchWordInfo(word) {
+      try {
+        const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
+        if (response.ok) {
+          const data = await response.json();
+          currentWordInfo = parseWordInfo(data[0]);
+        } else {
+          currentWordInfo = getDefaultWordInfo(word);
+        }
+      } catch (error) {
+        console.error('Error fetching word info:', error);
+        currentWordInfo = getDefaultWordInfo(word);
+      }
+    }
+
+    // Parse API response
+    function parseWordInfo(data) {
+      const info = {
+        word: data.word,
+        phonetic: data.phonetic || '',
+        origin: data.origin || '',
+        meanings: []
+      };
+
+      if (data.meanings && data.meanings.length > 0) {
+        data.meanings.forEach(meaning => {
+          const m = {
+            partOfSpeech: meaning.partOfSpeech,
+            definitions: []
+          };
+
+          if (meaning.definitions && meaning.definitions.length > 0) {
+            meaning.definitions.slice(0, 2).forEach(def => {
+              m.definitions.push({
+                definition: def.definition,
+                example: def.example || ''
+              });
+            });
+          }
+
+          info.meanings.push(m);
+        });
+      }
+
+      return info;
+    }
+
+    // Default word info if API fails
+    function getDefaultWordInfo(word) {
+      return {
+        word: word,
+        phonetic: '',
+        origin: '',
+        meanings: [{
+          partOfSpeech: 'word',
+          definitions: [{
+            definition: 'Definition not available. Please check a dictionary for more information.',
+            example: ''
+          }]
+        }]
+      };
+    }
+
+    // Check spelling
+    function checkSpelling() {
+      const input = document.getElementById('spelling-input');
+      const userAnswer = input.value.trim().toLowerCase();
+
+      if (!userAnswer) {
+        input.focus();
+        return;
+      }
+
+      const isCorrect = userAnswer === currentWord.toLowerCase();
+
+      // Update input styling
+      input.className = isCorrect ? 'correct' : 'incorrect';
+      input.disabled = true;
+
+      // Disable helper buttons and swap Submit for Next
+      document.getElementById('btn-submit').style.display = 'none';
+      document.getElementById('btn-next-top').style.display = 'block';
+      document.getElementById('btn-definition').disabled = true;
+      document.getElementById('btn-origin').disabled = true;
+      document.getElementById('btn-usage').disabled = true;
+
+      // Update score and stats
+      if (isCorrect) {
+        const difficulty = WORD_DIFFICULTY[currentWord];
+        const basePoints = difficulty * 10;
+        const streakBonus = streak * 5;
+        const wordScore = basePoints + streakBonus;
+
+        score += wordScore;
+        correctCount++;
+        streak++;
+        maxStreak = Math.max(maxStreak, streak);
+      } else {
+        streak = 0;
+      }
+
+      // Record result
+      wordResults.push({
+        word: currentWord,
+        userAnswer: userAnswer,
+        correct: isCorrect,
+        difficulty: WORD_DIFFICULTY[currentWord]
+      });
+
+      // Show feedback
+      showFeedback(isCorrect, userAnswer);
+      updateStats();
+    }
+
+    // Show feedback with word information
+    function showFeedback(isCorrect, userAnswer) {
+      const feedbackArea = document.getElementById('feedback-area');
+      feedbackArea.className = isCorrect ? 'correct' : 'incorrect';
+      feedbackArea.style.display = 'block';
+
+      document.getElementById('feedback-icon').textContent = isCorrect ? '&#x2705;' : '&#x274c;';
+      document.getElementById('feedback-title').textContent = isCorrect ? 'Correct!' : 'Not quite!';
+
+      const spellingDiv = document.getElementById('correct-spelling');
+      if (isCorrect) {
+        spellingDiv.innerHTML = `<strong>${currentWord}</strong>`;
+      } else {
+        spellingDiv.innerHTML = `You spelled: <strong>${userAnswer}</strong><br>Correct spelling: <strong>${currentWord}</strong>`;
+      }
+
+      // Display word information
+      displayWordInfo();
+    }
+
+    // Display word information
+    function displayWordInfo() {
+      const infoDiv = document.getElementById('word-info');
+
+      if (!currentWordInfo) {
+        infoDiv.innerHTML = '<p><span class="loading"></span> Loading word information...</p>';
+        // Retry after delay
+        setTimeout(displayWordInfo, 500);
+        return;
+      }
+
+      let html = '';
+
+      if (currentWordInfo.phonetic) {
+        html += `<p><strong>Pronunciation:</strong> ${currentWordInfo.phonetic}</p>`;
+      }
+
+      if (currentWordInfo.meanings && currentWordInfo.meanings.length > 0) {
+        currentWordInfo.meanings.forEach(meaning => {
+          html += `<h3>${meaning.partOfSpeech}</h3>`;
+          meaning.definitions.forEach(def => {
+            html += `<p><strong>Definition:</strong> ${def.definition}</p>`;
+            if (def.example) {
+              html += `<p><strong>Example:</strong> <em>"${def.example}"</em></p>`;
+            }
+          });
+        });
+      }
+
+      if (currentWordInfo.origin) {
+        html += `<h3>Origin</h3><p class="origin">${currentWordInfo.origin}</p>`;
+      }
+
+      infoDiv.innerHTML = html;
+    }
+
+    // Move to next word
+    function nextWord() {
+      currentWordIndex++;
+
+      if (currentWordIndex >= gameWords.length) {
+        showResults();
+      } else {
+        loadWord();
+      }
+    }
+
+    // Show final results
+    function showResults() {
+      document.getElementById('game-screen').style.display = 'none';
+      document.getElementById('results-screen').style.display = 'block';
+
+      document.getElementById('final-score').textContent = score;
+
+      const percentage = Math.round((correctCount / gameWords.length) * 100);
+      let message = '';
+      if (percentage === 100) message = 'Perfect Score! Amazing!';
+      else if (percentage >= 90) message = 'Excellent Work!';
+      else if (percentage >= 80) message = 'Great Job!';
+      else if (percentage >= 70) message = 'Good Effort!';
+      else if (percentage >= 60) message = 'Nice Try!';
+      else message = 'Keep Practicing!';
+
+      document.getElementById('score-message').textContent = message;
+      document.getElementById('score-details').textContent =
+        `${correctCount} out of ${gameWords.length} correct (${percentage}%) | Best streak: ${maxStreak}`;
+
+      // Build review list
+      let reviewHtml = '<h3 style="margin-bottom: 10px;">Word Review:</h3>';
+      wordResults.forEach(result => {
+        const className = result.correct ? 'correct-word' : 'incorrect-word';
+        const icon = result.correct ? '&#x2705;' : '&#x274c;';
+        reviewHtml += `
+          <div class="review-word ${className}">
+            <span>${icon} ${result.word}</span>
+            <span>${result.correct ? 'Correct' : 'Your answer: ' + result.userAnswer}</span>
+          </div>
+        `;
+      });
+
+      document.getElementById('words-review').innerHTML = reviewHtml;
+    }
+
+    // Handle Enter key
+    document.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        const feedbackArea = document.getElementById('feedback-area');
+        if (feedbackArea.style.display === 'block') {
+          nextWord();
+        } else if (document.getElementById('game-screen').style.display === 'block') {
+          checkSpelling();
+        }
+      }
+    });
+
+    // Load voices - trigger loading immediately and on change
+    if ('speechSynthesis' in window) {
+      // Try to load voices immediately
+      window.speechSynthesis.getVoices();
+      // Also listen for when voices become available
+      window.speechSynthesis.onvoiceschanged = function() {
+        window.speechSynthesis.getVoices();
+      };
+    }
+  </script>
+</body>
+</html>
